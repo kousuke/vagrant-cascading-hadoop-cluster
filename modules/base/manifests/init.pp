@@ -11,6 +11,15 @@ class base{
     require => Exec['apt-get update']
   }
 
+	file { "/etc/profile.d/java_home.sh":
+		ensure => file,
+    mode => 744,
+    owner => root,
+    group => root,
+  	content => "export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64",
+		require => Package['openjdk-7-jdk']
+	}
+
   file { "/root/.ssh":
     ensure => "directory",
   }
