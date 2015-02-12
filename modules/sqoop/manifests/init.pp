@@ -25,6 +25,11 @@ class sqoop {
     command => "/bin/chown -R vagrant.vagrant ${sqoop_home}",
 		require => Exec["unpack_sqoop"]
 	}
+	
+	exec { "fix_bin_permission_of_sqoop" :
+    command => "/bin/chmod 755 ${sqoop_home}/bin/*",
+		require => Exec["change_owner_of_sqoop"]
+	}
 
 	exec { "remove_old_sqoop_config" :
 		command => "/bin/rm -f ${sqoop_home}/server/conf/catalina.properties ${sqoop_home}/server/conf/sqoop.properties",
