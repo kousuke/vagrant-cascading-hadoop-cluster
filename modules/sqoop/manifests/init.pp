@@ -21,33 +21,33 @@ class sqoop {
     creates => "${sqoop_home}",
     require => Exec["download_sqoop"]
   }
-  exec { "change_owner" :
+  exec { "change_owner_of_sqoop" :
     command => "/bin/chown -R vagrant.vagrant ${sqoop_home}",
 		require => Exec["unpack_sqoop"]
 	}
 
-	exec { "remove_old_config" :
+	exec { "remove_old_sqoop_config" :
 		command => "/bin/rm -f ${sqoop_home}/server/conf/catalina.properties ${sqoop_home}/server/conf/sqoop.properties",
-		require => Exec["change_owner"]
+		require => Exec["change_owner_of_sqoop"]
 	}
 
 	file { "${sqoop_home}/server/conf/catalina.properties":
 		content => template("sqoop/catalina.properties.erb"),
 		owner => vagrant,
 		group => vagrant,
-    require => Exec["remove_old_config"]
+    require => Exec["remove_old_sqoop_config"]
 	}
 
 	file { "${sqoop_home}/server/conf/sqoop.properties":
 		content => template("sqoop/sqoop.properties.erb"),
 		owner => vagrant,
 		group => vagrant,
-    require => Exec["remove_old_config"]
+    require => Exec["remove_old_sqoop_config"]
 	}
 
 	file { "${sqoop_home}/lib/":
 			ensure => "directory",
-			require => Exec["change_owner"]
+			require => Exec["change_owner_of_sqoop"]
 	} 
 
 	file { "${sqoop_home}/lib/mysql-connector-java.jar":
