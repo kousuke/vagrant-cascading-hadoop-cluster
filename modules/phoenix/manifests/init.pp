@@ -20,16 +20,30 @@ class phoenix {
     require => Exec["download_phoenix"]
   }
   
-  exec { "change_owner_of_phoenix" :
-    command => "/bin/chown -R vagrant.vagrant ${phoenix_home}",
+  exec { "remove_jar_of_phoenix" :
+    command => "/bin/rm ${phoenix_home}/phoenix-${phoenix_version}-server.jar",
 		require => Exec["unpack_phoenix"]
+	}
+  	
+	file { "${phoenix_home}/phoenix-${phoenix_version}-server.jar":
+		source => "puppet:///modules/phoenix/phoenix-${phoenix_version}-server.jar",
+		ensure => file,
+		mode => 644,
+		owner => vagrant,
+		group => vagrant,
+		require => [Exec["remove_jar_of_phoenix"], Exec["unpack_hbase"]]
 	}
 	
 	exec { "jar_copy_from_phoenix_to_hbase":
 		command => "/bin/cp ${phoenix_home}/phoenix-${phoenix_version}-server.jar /opt/hbase-${hbase_version}-hadoop2/lib/",
-		require => [Exec["unpack_phoenix"], Exec["unpack_hbase"]]
-
+		require => [Exec["remove_jar_of_phoenix"], Exec["unpack_hbase"], File["${phoenix_home}/phoenix-${phoenix_version}-server.jar"]]
 	}
+	
+	exec { "change_owner_of_phoenix" :
+    command => "/bin/chown -R vagrant.vagrant ${phoenix_home}",
+		require => Exec["jar_copy_from_phoenix_to_hbase"]
+	}
+	
 
 	file { "/etc/profile.d/phoenix-path.sh":
     content => template("phoenix/phoenix-path.sh.erb"),
